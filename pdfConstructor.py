@@ -1,6 +1,7 @@
 from PyPDF2 import PdfFileReader
 from PyPDF2 import PdfFileWriter
 from deckReader import deckReader
+import sys
 def writeCards(dict, cards, num, name):
 	for card in range(1, len(cards)+1):
 		dict[num.format(card)] = cards[card-1][0]
@@ -64,16 +65,18 @@ def removeApTags(file):
 	f.close
 			
 if __name__ == "__main__":
+	print sys.argv
+	if len(sys.argv) > 1:
+		deck = sys.argv[1]
+	else:
+		deck = "yosenju.dek"
 	f = open("KDE_DeckList.pdf", 'rb')
 	pdf = PdfFileReader(f)
 	page = pdf.getPage(0)
 	dict = pdf.getFormTextFields()
-	fields = pdf.getFields()
-	print fields.keys()
 	for key in dict:
 		if dict[key] == None:
 			dict[key] = ""
-	deck = "yosenju.dek"
 	monsters, spells, traps, extra, side = deckReader(deck)
 	writeEverything(dict, monsters, spells, traps, side, extra)
 	writer = PdfFileWriter()
