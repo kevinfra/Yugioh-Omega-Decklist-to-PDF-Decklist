@@ -2,6 +2,7 @@ from PyPDF2 import PdfFileReader
 from PyPDF2 import PdfFileWriter
 from deckReader import deckReader
 import sys
+import os
 def writeCards(dict, cards, num, name):
 	for card in range(1, len(cards)+1):
 		dict[num.format(card)] = cards[card-1][0]
@@ -46,7 +47,7 @@ def writeEverything(dict, monsters, spells, traps, side, extra):
 	writeMonsters(dict, monsters)
 	writeExtra(dict, extra)
 	writeSide(dict, side)
-	
+#if /AP tags aren't removed, then cards aren't visible on the decklist form.
 def removeApTags(file):
 	f = open(file, "rb").readlines()
 	newFile = ""
@@ -60,7 +61,7 @@ def removeApTags(file):
 				newFile += (line)
 		elif line.startswith(">>"):
 			rem = False
-	f = open("output2.pdf", "wb")
+	f = open("output.pdf", "wb")
 	f.write(newFile)
 	f.close
 			
@@ -86,3 +87,4 @@ if __name__ == "__main__":
 	writer.write(out)
 	out.close()
 	removeApTags("output.pdf")
+	os.startfile("output.pdf")
