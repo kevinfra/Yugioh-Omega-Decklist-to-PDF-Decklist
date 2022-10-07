@@ -34,7 +34,6 @@ def writeExtra(fields, cards):
 def writeSide(fields, cards):
 	num = "Number SD {}"
 	name = "Card SD {}"
-	[print(x) for  x in cards]
 	fields["Total Side Deck"] = sum([int(x[0]) for x in cards])
 	writeCards(fields, cards, num, name)
 	
@@ -75,7 +74,6 @@ if __name__ == "__main__":
 	monsters, spells, traps, extra, side = deckReader(deck)
 	writeEverything(fields, monsters, spells, traps, side, extra)
 	writer = init_pdf_writer_from_reader(pdf)
-	writer.addPage(page)
 	writer.update_page_form_field_values(writer.pages[0], fields)
 	out = open('output.pdf', 'wb')
 	writer.write(out)

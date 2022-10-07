@@ -28,9 +28,3 @@ def deckReader(dekFile):
 			deck[mode].append([line[0], line[1:].strip()])
 			
 	return (deck[monsters], deck[spells], deck[traps], deck[extra], deck[side])
-		
-
-if __name__ == "__main__":
-	deck = "yosenju.dek"
-	monsters, spells, traps, extra, side = deckReader(deck)
-				
