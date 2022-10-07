@@ -1,90 +1,83 @@
-from PyPDF2 import PdfFileReader
-from PyPDF2 import PdfFileWriter
+from PyPDF2 import PdfFileWriter, PdfFileReader
 from deckReader import deckReader
+from pdfwriterInit import init_pdf_writer_from_reader
 import sys
 import os
-def writeCards(dict, cards, num, name):
+def writeCards(fields, cards, num, name):
 	for card in range(1, len(cards)+1):
-		dict[num.format(card)] = cards[card-1][0]
-		if num.format(card) == "Mon 1 Number":
-			dict["Mon 1 number"] = cards[card-1][0]
-		dict[name.format(card)] = cards[card-1][1]
-def writeSpells(dict, cards):
-	num = "Spell {} Number"
-	name = "Spell {} Name"
-	dict["Total Spell Cards"] = sum([int(x[0]) for x in cards])
-	writeCards(dict, cards, num, name)
+		fields[num.format(card)] = cards[card-1][0]
+		fields[name.format(card)] = cards[card-1][1]
+def writeSpells(fields, cards):
+	num = "Number Spell {}"
+	name = "Card Spell {}"
+	fields["Total Spell Cards"] = sum([int(x[0]) for x in cards])
+	writeCards(fields, cards, num, name)
 	
-def writeTraps(dict, cards):
-	num = "Trap {} Number"
-	name = "Trap {} Name"
-	dict["Total Trap Cards"] = sum([int(x[0]) for x in cards])
-	writeCards(dict, cards, num, name)
+def writeTraps(fields, cards):
+	num = "Number Trap {}"
+	name = "Card Trap {}"
+	fields["Total Trap Cards"] = sum([int(x[0]) for x in cards])
+	writeCards(fields, cards, num, name)
 	
-def writeMonsters(dict, cards):
-	num = "Mon {} Number"
-	name = "Mon {} Name"
-	dict["Total Mon Cards"] = sum([int(x[0]) for x in cards])
-	writeCards(dict, cards, num, name)
+def writeMonsters(fields, cards):
+	num = "Number Monster {}"
+	name = "Card Monster {}"
+	fields["Total Monster Cards"] = sum([int(x[0]) for x in cards])
+	writeCards(fields, cards, num, name)
 
-def writeExtra(dict, cards):
-	num = "Extra {} Number"
-	name = "Extra {} Name"
-	dict["Total Extra Deck"] = sum([int(x[0]) for x in cards])
-	writeCards(dict, cards, num, name)
+def writeExtra(fields, cards):
+	num = "Number ED {}"
+	name = "Card ED {}"
+	fields["Total Extra Deck"] = sum([int(x[0]) for x in cards])
+	writeCards(fields, cards, num, name)
 	
-def writeSide(dict, cards):
-	num = "Side {} Number"
-	name = "Side {} Name"
-	dict["Total Side Number"] = sum([int(x[0]) for x in cards])
-	writeCards(dict, cards, num, name)
+def writeSide(fields, cards):
+	num = "Number SD {}"
+	name = "Card SD {}"
+	[print(x) for  x in cards]
+	fields["Total Side Deck"] = sum([int(x[0]) for x in cards])
+	writeCards(fields, cards, num, name)
 	
-def writeEverything(dict, monsters, spells, traps, side, extra):
+def writeEverything(fields, monsters, spells, traps, side, extra):
 	main = monsters + spells + traps
-	dict["Main Deck Total"] = sum([int(x[0]) for x in main])
-	writeSpells(dict, spells)
-	writeTraps(dict, traps)
-	writeMonsters(dict, monsters)
-	writeExtra(dict, extra)
-	writeSide(dict, side)
-#if /AP tags aren't removed, then cards aren't visible on the decklist form.
-def removeApTags(file):
-	f = open(file, "rb").readlines()
-	newFile = ""
-	rem = False
-	print len(f)
-	for line in f:
-		if rem == False:
-			if line.startswith("/AP"):
-				rem = True
-			else:
-				newFile += (line)
-		elif line.startswith(">>"):
-			rem = False
-	f = open("output.pdf", "wb")
-	f.write(newFile)
-	f.close
+	fields["Total Main Deck"] = sum([int(x[0]) for x in main])
+	writeSpells(fields, spells)
+	writeTraps(fields, traps)
+	writeMonsters(fields, monsters)
+	writeExtra(fields, extra)
+	writeSide(fields, side)
 			
 if __name__ == "__main__":
-	print sys.argv
-	if len(sys.argv) > 1:
+	print(sys.argv)
+	try:
 		deck = sys.argv[1]
-	else:
-		deck = "yosenju.dek"
+	except:
+		print("Usage: python3 pdfConstructor.py deck.dek [FirstName LastName Country KonamiId Event]")
+
 	f = open("KDE_DeckList.pdf", 'rb')
 	pdf = PdfFileReader(f)
 	page = pdf.getPage(0)
-	dict = pdf.getFormTextFields()
-	for key in dict:
-		if dict[key] == None:
-			dict[key] = ""
+	fields = pdf.get_form_text_fields()
+	for key in fields:
+		if fields[key] == None:
+			fields[key] = ""
+	if len(sys.argv) > 2:
+		fields["First Name"] = sys.argv[2]
+	if len(sys.argv) > 3:
+		fields["Names"] = sys.argv[3]
+		fields["Initial"] = sys.argv[3][0]
+	if len(sys.argv) > 4:
+		fields["Country of Residence"] = sys.argv[4]
+	if len(sys.argv) > 5:
+		fields["KONAMI ID"] = sys.argv[5]
+	if len(sys.argv) > 6:
+		fields["Event"] = sys.argv[6]
 	monsters, spells, traps, extra, side = deckReader(deck)
-	writeEverything(dict, monsters, spells, traps, side, extra)
-	writer = PdfFileWriter()
-	new = writer.updatePageFormFieldValues(page, dict)
+	writeEverything(fields, monsters, spells, traps, side, extra)
+	writer = init_pdf_writer_from_reader(pdf)
 	writer.addPage(page)
+	writer.update_page_form_field_values(writer.pages[0], fields)
 	out = open('output.pdf', 'wb')
 	writer.write(out)
 	out.close()
-	removeApTags("output.pdf")
-	os.startfile("output.pdf")
+	f.close()
