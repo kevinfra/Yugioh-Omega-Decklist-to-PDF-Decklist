@@ -48,11 +48,11 @@ def writeEverything(fields, monsters, spells, traps, side, extra):
 	writeSide(fields, side)
 			
 if __name__ == "__main__":
-	print(sys.argv)
 	try:
 		deck = sys.argv[1]
 	except:
 		print("Usage: python3 pdfConstructor.py deck.dek [FirstName LastName Country KonamiId Event]")
+		sys.exit(1)
 
 	f = open("KDE_DeckList.pdf", 'rb')
 	pdf = PdfFileReader(f)
