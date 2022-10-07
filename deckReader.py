@@ -1,26 +1,33 @@
 def deckReader(dekFile):
-	f = open(dekFile).readlines()
-	mode = None
-	monsters = []
-	spells = []
-	traps = []
-	extra = []
-	side = []
+	monsters = "MONSTERS"
+	traps = "TRAPS"
+	spells = "SPELLS"
+	extra = "EXTRA"
+	side = "SIDE"
+	f = open(dekFile, "r").readlines()
+	mode = ""
+	deck = {
+		monsters: [],
+		traps: [],
+		spells: [],
+		extra: [],
+		side: []
+	}
 	for line in f:
-		if line.startswith("MONSTERS:"):
+		if line.startswith("Monster"):
 			mode = monsters
-		elif line.startswith("TRAPS:"):
+		elif line.startswith("Trap"):
 			mode = traps
-		elif line.startswith("SPELLS:"):
+		elif line.startswith("Spell"):
 			mode = spells
-		elif line.startswith("EXTRA:"):
+		elif line.startswith("Extra"):
 			mode = extra
-		elif line.startswith("SIDE:"):
+		elif line.startswith("Side"):
 			mode = side
 		else:
-			mode.append([line[0], line[1:].strip()])
+			deck[mode].append([line[0], line[1:].strip()])
 			
-	return (monsters, spells, traps, extra, side)
+	return (deck[monsters], deck[spells], deck[traps], deck[extra], deck[side])
 		
 
 if __name__ == "__main__":
